@@ -242,18 +242,18 @@
 
   var TV_THEME = {
     layout: {
-      background: { type: 'solid', color: '#161922' },
-      textColor: '#636a7e',
+      background: { type: 'solid', color: '#ffffff' },
+      textColor: '#8a8f9e',
       fontFamily: "'IBM Plex Mono', 'SF Mono', monospace",
       fontSize: 10
     },
     grid: {
-      vertLines: { color: '#1e2230' },
-      horzLines: { color: '#1e2230' }
+      vertLines: { color: '#f0f0f4' },
+      horzLines: { color: '#f0f0f4' }
     },
     crosshair: { mode: 0 },
     timeScale: {
-      borderColor: '#252a36',
+      borderColor: '#e2e4e8',
       timeVisible: false,
       secondsVisible: false
     },
@@ -277,23 +277,23 @@
     var chart = LightweightCharts.createChart(container, Object.assign({}, TV_THEME, {
       width: container.clientWidth,
       height: 380,
-      rightPriceScale: { borderColor: '#1e1e2e', scaleMargins: { top: 0.1, bottom: 0.1 } }
+      rightPriceScale: { borderColor: '#e2e4e8', scaleMargins: { top: 0.1, bottom: 0.1 } }
     }));
 
     var brentSeries = chart.addLineSeries({
-      color: '#6b8fc7', lineWidth: 2, priceScaleId: 'left', title: 'BRENT',
-      lastValueVisible: true, priceLineVisible: true, priceLineColor: '#6b8fc744',
+      color: '#4a6fa5', lineWidth: 2, priceScaleId: 'left', title: 'BRENT',
+      lastValueVisible: true, priceLineVisible: true, priceLineColor: '#4a6fa533',
       priceFormat: { type: 'price', precision: 2, minMove: 0.01 }
     });
 
     var s3Series = chart.addLineSeries({
-      color: '#b8965a', lineWidth: 2, priceScaleId: 'right', title: 'ITO-S3',
-      lastValueVisible: true, priceLineVisible: true, priceLineColor: '#b8965a44',
+      color: '#8c7038', lineWidth: 2, priceScaleId: 'right', title: 'ITO-S3',
+      lastValueVisible: true, priceLineVisible: true, priceLineColor: '#8c703833',
       priceFormat: { type: 'price', precision: 2, minMove: 0.01 }
     });
 
     chart.priceScale('left').applyOptions({
-      borderColor: '#252a36',
+      borderColor: '#e2e4e8',
       scaleMargins: { top: 0.1, bottom: 0.1 }
     });
 
@@ -412,8 +412,8 @@
           if (apiRolling) {
             var betaData = zipChart(apiRolling.dates, apiRolling.beta);
             var r2Data   = zipChart(apiRolling.dates, apiRolling.r2);
-            createSmallChart('beta-chart', betaData, '#6b8fc7', 'BETA', 5);
-            createSmallChart('r2-chart',   r2Data,   '#b8965a', 'R2',   4);
+            createSmallChart('beta-chart', betaData, '#4a6fa5', 'BETA', 5);
+            createSmallChart('r2-chart',   r2Data,   '#8c7038', 'R2',   4);
           }
         } catch (e) { console.warn('createSmallChart:', e); }
       })
