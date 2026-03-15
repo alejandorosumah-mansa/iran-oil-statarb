@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>ITO-S3 OIL TERMINAL</title>
+
+  <!-- Google Fonts: Libre Baskerville + Inter + IBM Plex Mono -->
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=Inter:wght@400;500;600;700&family=Libre+Baskerville:wght@400;700&display=swap" rel="stylesheet">
+
+  <!-- Terminal CSS -->
+  <link rel="stylesheet" href="css/terminal.css">
+</head>
+<body>
+
+  <!-- ====================================================
+       TOP BAR
+       ==================================================== -->
+  <header class="topbar">
+    <div class="topbar__brand">
+      ITO-S3 OIL TERMINAL
+      <span class="sub">Brent Crude Prediction System</span>
+    </div>
+
+    <div class="topbar__center">
+      <span id="clock" class="topbar__clock">----/--/-- --:--:-- UTC</span>
+    </div>
+
+    <div class="topbar__right">
+      <div id="status-live" class="topbar__live">
+        <span class="dot"></span> LIVE
+      </div>
+      <div id="status-disconnected" class="topbar__disconnected" style="display:none;">
+        <span class="dot"></span> DISCONNECTED
+      </div>
+    </div>
+  </header>
+
+  <!-- ====================================================
+       DASHBOARD GRID
+       ==================================================== -->
+  <main class="dashboard">
+
+    <!-- ==================================================
+         ROW 1: SIGNAL | PERFORMANCE | BASKET
+         ================================================== -->
+
+    <!-- PANEL: SIGNAL -->
+    <div class="panel">
+      <div class="panel__header">
+        <span class="panel__title">Signal</span>
+        <span id="signal-badge" class="panel__badge panel__badge--amber">FLAT</span>
+      </div>
+      <div id="signal-body">
+        <div class="signal-display">
+          <div id="signal-direction" class="signal-display__direction flat">FLAT</div>
+          <div class="signal-display__sub">Current Position</div>
+        </div>
+
+        <div class="signal-metrics">
+          <div class="metric">
+            <span class="label">Predicted Return</span>
+            <span id="signal-pred-ret" class="value">--</span>
+          </div>
+          <div class="metric">
+            <span class="label">Implied Brent</span>
+            <span id="signal-implied" class="value">--</span>
+          </div>
+          <div class="metric">
+            <span class="label">Confidence</span>
+            <span id="signal-conf" class="value">--</span>
+          </div>
+          <div class="metric">
+            <span class="label">Current Brent</span>
+            <span id="signal-brent" class="value">--</span>
+          </div>
+          <div class="metric">
+            <span class="label">Rolling Beta</span>
+            <span id="signal-beta" class="value">--</span>
+          </div>
+          <div class="metric">
+            <span class="label">Rolling R2</span>
+            <span id="signal-r2" class="value">--</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- PANEL: PERFORMANCE -->
+    <div class="panel">
+      <div class="panel__header">
+        <span class="panel__title">Strategy Performance</span>
+        <span class="panel__badge panel__badge--green">ACTIVE</span>
+      </div>
+      <div id="strategy-body">
+        <div class="stat-row">
+          <span class="label">Sharpe Ratio</span>
+          <span id="strat-sharpe" class="value highlight">--</span>
+        </div>
+        <div class="stat-row">
+          <span class="label">Cumulative P&amp;L</span>
+          <span id="strat-cumulative" class="value">--</span>
+        </div>
+        <div class="stat-row">
+          <span class="label">Max Drawdown</span>
+          <span id="strat-maxdd" class="value">--</span>
+        </div>
+        <div class="stat-row">
+          <span class="label">Calmar Ratio</span>
+          <span id="strat-calmar" class="value">--</span>
+        </div>
+        <div class="stat-row">
+          <span class="label">Accuracy</span>
+          <span id="strat-accuracy" class="value">--</span>
+        </div>
+        <div class="stat-row">
+          <span class="label">Total Trades</span>
+          <span id="strat-trades" class="value">--</span>
+        </div>
+
+        <hr class="divider">
+
+        <div class="stat-row">
+          <span class="label">Win Rate</span>
+          <span id="strat-winrate" class="value">--</span>
+        </div>
+        <div class="stat-row">
+          <span class="label">Avg Win</span>
+          <span id="strat-avgwin" class="value">--</span>
+        </div>
+        <div class="stat-row">
+          <span class="label">Avg Loss</span>
+          <span id="strat-avgloss" class="value">--</span>
+        </div>
+        <div class="stat-row">
+          <span class="label">Profit Factor</span>
+          <span id="strat-pf" class="value">--</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- PANEL: ITO-S3 BASKET -->
+    <div class="panel">
+      <div class="panel__header">
+        <span class="panel__title">ITO-S3 Basket</span>
+        <span id="basket-status" class="status-pill status-pill--ath">--</span>
+      </div>
+      <div id="basket-body">
+        <div class="big-number__label">Current Level</div>
+        <div id="basket-level" class="big-number">--</div>
+
+        <div class="stat-row mt-8">
+          <span class="label">Today's Return</span>
+          <span id="basket-return" class="value">--</span>
+        </div>
+
+        <hr class="divider">
+
+        <div class="stat-row">
+          <span class="label">7-Day Return</span>
+          <span id="basket-7d" class="value">--</span>
+        </div>
+        <div class="stat-row">
+          <span class="label">30-Day Return</span>
+          <span id="basket-30d" class="value">--</span>
+        </div>
+        <div class="stat-row">
+          <span class="label">1-Year Return</span>
+          <span id="basket-1y" class="value">--</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- ==================================================
+         ROW 2: MAIN CHART (full width)
+         ================================================== -->
+
+    <div class="panel full-width">
+      <div class="panel__header">
+        <span class="panel__title">Brent Crude vs ITO-S3 Basket</span>
+        <span class="fs-small text-muted">
+          <span style="color:#6b8fc7;">&#9632;</span> BRENT (left axis)
+          &nbsp;&nbsp;
+          <span style="color:#b8965a;">&#9632;</span> ITO-S3 (right axis)
+        </span>
+      </div>
+      <div id="main-chart" class="chart-container chart-main"></div>
+    </div>
+
+    <!-- ==================================================
+         ROW 3: PROBABILITY TABLE | RECENT TRADES
+         ================================================== -->
+
+    <!-- PANEL: PROBABILITY TABLE -->
+    <div class="panel two-thirds">
+      <div class="panel__header">
+        <span class="panel__title">Brent Price Probabilities</span>
+        <span class="fs-small text-muted">P(Brent > $X) at 21-day horizon</span>
+      </div>
+      <div class="table-scroll">
+        <table class="data-table prob-table">
+          <thead>
+            <tr>
+              <th class="right">Threshold</th>
+              <th class="right">Gaussian</th>
+              <th class="right">Student-t</th>
+              <th class="right">Polymarket</th>
+            </tr>
+          </thead>
+          <tbody id="prob-tbody">
+            <tr><td colspan="4" class="text-muted" style="text-align:center;padding:20px;">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- PANEL: RECENT TRADES -->
+    <div class="panel">
+      <div class="panel__header">
+        <span class="panel__title">Recent Trades</span>
+        <span class="fs-small text-muted">Last 20 signals</span>
+      </div>
+      <div class="table-scroll">
+        <table class="data-table">
+          <thead>
+            <tr>
+              <th>Date</th>
+              <th class="right">Brent</th>
+              <th>Signal</th>
+              <th class="right">P&amp;L</th>
+              <th class="right">S3</th>
+            </tr>
+          </thead>
+          <tbody id="trades-tbody">
+            <tr><td colspan="5" class="text-muted" style="text-align:center;padding:20px;">Loading...</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <!-- ==================================================
+         ROW 4: ROLLING BETA | ROLLING R2
+         ================================================== -->
+
+    <!-- PANEL: ROLLING BETA -->
+    <div class="panel">
+      <div class="panel__header">
+        <span class="panel__title">Rolling Beta (63d)</span>
+        <span class="fs-small text-muted">CL ~ S3 sensitivity</span>
+      </div>
+      <div id="beta-chart" class="chart-container chart-small"></div>
+    </div>
+
+    <!-- PANEL: ROLLING R2 -->
+    <div class="panel">
+      <div class="panel__header">
+        <span class="panel__title">Rolling R-Squared (63d)</span>
+        <span class="fs-small text-muted">Explanatory power</span>
+      </div>
+      <div id="r2-chart" class="chart-container chart-small"></div>
+    </div>
+
+    <!-- PANEL: MODEL INFO (optional third column) -->
+    <div class="panel">
+      <div class="panel__header">
+        <span class="panel__title">Model Info</span>
+      </div>
+      <div class="stat-row">
+        <span class="label">Model</span>
+        <span class="value">OLS + Rolling 63d</span>
+      </div>
+      <div class="stat-row">
+        <span class="label">Basket</span>
+        <span class="value">ADIT-S3</span>
+      </div>
+      <div class="stat-row">
+        <span class="label">Domain</span>
+        <span class="value">ME Armed Conflict</span>
+      </div>
+      <div class="stat-row">
+        <span class="label">Underlying</span>
+        <span class="value">BZ=F / CL=F</span>
+      </div>
+      <div class="stat-row">
+        <span class="label">Data Source</span>
+        <span class="value">Polymarket + yfinance</span>
+      </div>
+      <div class="stat-row">
+        <span class="label">Refresh</span>
+        <span class="value">60s auto</span>
+      </div>
+
+      <hr class="divider">
+
+      <div class="fs-small text-muted" style="line-height:1.5;">
+        Signal: regress Brent on ADIT-S3 basket level via rolling 63-day OLS.
+        Spread z-score triggers LONG (z &lt; -1.5), SHORT (z &gt; 1.5), or FLAT.
+        Probabilities from bootstrap MC (10k paths, 21d horizon) and Gaussian fit.
+      </div>
+    </div>
+
+  </main>
+
+  <!-- ====================================================
+       SCRIPTS
+       ==================================================== -->
+  <script src="https://unpkg.com/lightweight-charts@4.1.0/dist/lightweight-charts.standalone.production.js"></script>
+  <script src="js/app.js?v=3"></script>
+
+</body>
+</html>
