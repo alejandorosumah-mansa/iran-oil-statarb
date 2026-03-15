@@ -391,8 +391,8 @@
 
         // --- Basket panel ---
         try {
-          if (apiData && apiData.s3_level) {
-            renderBasket(null, apiData.s3_level);
+          if (apiData && apiData.s3_bridged) {
+            renderBasket(null, apiData.s3_bridged);
           }
         } catch (e) { console.warn('renderBasket:', e); }
 
@@ -412,7 +412,7 @@
         try {
           if (apiData) {
             var brentChart = zipChart(apiData.dates, apiData.brent_price);
-            var s3Chart    = zipChart(apiData.dates, apiData.s3_level);
+            var s3Chart    = zipChart(apiData.dates, apiData.s3_bridged);
             if (brentChart.length) createMainChart(brentChart, s3Chart);
           }
         } catch (e) { console.warn('createMainChart:', e); }
