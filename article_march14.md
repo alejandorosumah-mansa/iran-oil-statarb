@@ -8,7 +8,7 @@
 
 We document a statistically significant lead-lag relationship between Polymarket geopolitical contracts and Brent crude oil futures. A basket of 15 Middle East armed conflict prediction market contracts (the ITO-S3 basket) leads Brent crude by one trading day, with cross-correlation r=0.131 (p=0.003). We exploit this signal with a rolling 63-day lag-1 OLS regression on Brownian-bridge-interpolated basket returns, filtered with a 0.5% signal threshold. The resulting strategy delivers a Sharpe ratio of 1.27, cumulative return of +43.5%, and maximum drawdown of -11.3% over 488 trading days. We open-source the full implementation including a live monitoring dashboard.
 
-**Repository**: [github.com/alejandorosumah-mansa/iran-oil-statarb](https://github.com/alejandorosumah-mansa/iran-oil-statarb)
+**Repository**: [github.com/Ito-Markets/iran-oil-statarb](https://github.com/Ito-Markets/iran-oil-statarb)
 
 ---
 
@@ -211,7 +211,7 @@ Beta is highly regime-dependent — near zero during calm periods, spiking durin
 
 The full implementation is open-sourced at:
 
-**[github.com/alejandorosumah-mansa/iran-oil-statarb](https://github.com/alejandorosumah-mansa/iran-oil-statarb)**
+**[github.com/Ito-Markets/iran-oil-statarb](https://github.com/Ito-Markets/iran-oil-statarb)**
 
 The repository includes:
 - FastAPI backend with 5 API endpoints serving live data
@@ -221,7 +221,7 @@ The repository includes:
 - Full research scripts for model selection, diagnostics, and chart generation
 
 ```bash
-git clone https://github.com/alejandorosumah-mansa/iran-oil-statarb.git
+git clone https://github.com/Ito-Markets/iran-oil-statarb.git
 cd iran-oil-statarb
 pip install -r requirements.txt
 uvicorn src.api.server:app --reload

@@ -56,7 +56,7 @@ Auto-refreshes every 60 seconds.
 ## quickstart
 
 ```bash
-git clone https://github.com/alejandorosumah-mansa/iran-oil-statarb.git
+git clone https://github.com/Ito-Markets/iran-oil-statarb.git
 cd iran-oil-statarb
 pip install -r requirements.txt
 ```
