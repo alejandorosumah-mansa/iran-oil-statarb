@@ -4,9 +4,11 @@ Systematic trading strategy that predicts Brent crude oil from Middle East predi
 
 The oil futures market prices 2.7% probability of Iran escalation. Polymarket prices 58%. We found a one-day lag between prediction market repricing and oil price movement, and built a rolling OLS model to trade it.
 
-**Sharpe 1.27 | 59% accuracy | 63 trades/year | -11.3% max drawdown**
+**Sharpe 1.27 | 58% win rate | 2.16 profit factor | -11.3% max drawdown**
 
-Ships with a Bloomberg-terminal-style dark dashboard.
+Ships with a live institutional-grade dashboard.
+
+![Dashboard Overview](screenshots/dashboard_full.png)
 
 ---
 
@@ -17,18 +19,44 @@ The ITO-S3 basket is a portfolio of 15 Polymarket contracts tracking Middle East
 The model is a rolling 63-day OLS regression on Brownian-bridged S3 returns with a 0.5% signal threshold:
 
 ```
-alpha(t), beta(t) = OLS[ brent_ret ~ s3_ret(lag 1) ] over [t-63, t]
-signal(t) = alpha(t) + beta(t) * s3_bridged_ret(t)
+alpha(t), beta(t) = OLS[ brent_ret(t) ~ s3_ret(t-1) ] over [t-63, t]
+signal(t) = alpha(t) + beta(t) * s3_bridged_ret(t-1)
 
 LONG  if signal > +0.5%
 SHORT if signal < -0.5%
 FLAT  otherwise
 ```
 
+## dashboard
+
+Institutional light-theme terminal built with TradingView lightweight-charts:
+
+![Signal, Performance & Basket Panels](screenshots/dashboard_top.png)
+
+- **Signal panel**: current LONG/SHORT/FLAT with implied price and confidence interval
+- **Strategy performance**: Sharpe, cumulative return, drawdown, Calmar, win rate, profit factor
+- **ITO-S3 basket**: current level, multi-period returns, all-time-high indicator
+
+![Brent vs ITO-S3 Chart](screenshots/chart_brent_vs_s3.png)
+
+- **Price chart**: Brent crude (left axis) vs ITO-S3 basket (right axis) with Brownian-bridged interpolation
+
+![Probability Table & Trades](screenshots/dashboard_tables.png)
+
+- **Probability table**: P(Brent > $X) under Gaussian, Student-t, and 21-day horizon models
+- **Recent trades**: last 20 signals with P&L, color-coded by direction
+
+![Rolling Diagnostics](screenshots/dashboard_bottom.png)
+
+- **Rolling beta & R-squared**: 63-day rolling regression diagnostics
+- **Model info**: specification summary
+
+Auto-refreshes every 60 seconds.
+
 ## quickstart
 
 ```bash
-git clone https://github.com/ITO-Research/iran-oil-statarb.git
+git clone https://github.com/alejandorosumah-mansa/iran-oil-statarb.git
 cd iran-oil-statarb
 pip install -r requirements.txt
 ```
@@ -68,8 +96,8 @@ iran-oil-statarb/
       probability.py       # Student-t tail probability extraction
     config.py              # constants (window size, threshold, basket code)
   dashboard/
-    index.html             # Bloomberg-terminal UI
-    css/terminal.css       # dark theme
+    index.html             # institutional terminal UI
+    css/terminal.css       # light institutional theme
     js/app.js              # frontend logic, TradingView charts
   Data/
     basket_level_monthly.csv       # ITO-S3 daily levels (1,527 obs, 2022-2026)
@@ -132,6 +160,20 @@ Jarque-Bera  432.6       (p=0.00, fat tails - expected for oil)
 
 Residuals fit Student-t with df=4.2. The model passes every specification test except normality, which is expected for commodity returns.
 
+### strategy performance
+
+| metric | value |
+|--------|-------|
+| Sharpe Ratio | 1.27 |
+| Cumulative P&L | +43.5% |
+| Max Drawdown | -11.3% |
+| Calmar Ratio | 1.76 |
+| Win Rate | 57.8% |
+| Avg Win | +1.94% |
+| Avg Loss | -1.28% |
+| Profit Factor | 2.16 |
+| Total Trades | 89 |
+
 ### regime performance
 
 | regime | Sharpe | interpretation |
@@ -142,26 +184,13 @@ Residuals fit Student-t with df=4.2. The model passes every specification test e
 
 This is a geopolitical shock harvester. It captures the information transfer from prediction markets to oil that activates during Middle East crises.
 
-## the dashboard
-
-Dark Bloomberg-terminal-style single-page app:
-
-- **Signal panel**: current LONG/SHORT/FLAT with implied price and confidence interval
-- **Performance panel**: Sharpe, cumulative return, drawdown, Calmar, accuracy
-- **Price chart**: Brent + ITO-S3 overlay using TradingView lightweight-charts
-- **Probability table**: Gaussian vs Student-t vs Polymarket touch probabilities
-- **Recent trades**: last 20 signals with P&L, color-coded
-- **Rolling diagnostics**: beta and R-squared time series
-
-Auto-refreshes every 60 seconds.
-
 ## API
 
 | endpoint | returns |
 |----------|---------|
 | `GET /api/data` | full aligned time series (brent, s3, bridged s3, returns) |
 | `GET /api/signal` | current signal, implied price, confidence interval, rolling params |
-| `GET /api/strategy` | sharpe, cumret, maxdd, calmar, accuracy, equity curve, recent trades |
+| `GET /api/strategy` | sharpe, cumret, maxdd, calmar, accuracy, win/loss stats, equity curve |
 | `GET /api/probabilities` | gaussian vs student-t tail probabilities, multi-horizon table |
 | `GET /api/rolling` | rolling beta, R-squared, alpha time series |
 
