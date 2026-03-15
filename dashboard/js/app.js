@@ -137,10 +137,18 @@
     setText('strat-calmar', fmt(data.calmar, 2));
     setText('strat-accuracy', fmt(accuracy, 0) + '%');
     setText('strat-trades', nTrades);
-    setText('strat-winrate', fmt(accuracy, 0) + '%');
-    setText('strat-avgwin', '--');
-    setText('strat-avgloss', '--');
-    setText('strat-pf', '--');
+    var winRate = data.win_rate != null ? data.win_rate * 100 : null;
+    var avgWin = data.avg_win != null ? data.avg_win * 100 : null;
+    var avgLoss = data.avg_loss != null ? data.avg_loss * 100 : null;
+    var pf = data.profit_factor;
+
+    setText('strat-winrate', winRate != null ? fmt(winRate, 1) + '%' : '--');
+    setText('strat-avgwin', avgWin != null ? fmtSign(avgWin, 2) + '%' : '--');
+    setText('strat-avgloss', avgLoss != null ? fmtSign(avgLoss, 2) + '%' : '--');
+    setText('strat-pf', pf != null ? fmt(pf, 2) : '--');
+
+    var wEl = el('strat-avgwin');  if (wEl) wEl.className = 'value positive';
+    var lEl = el('strat-avgloss'); if (lEl) lEl.className = 'value negative';
 
     var cumEl = el('strat-cumulative');
     if (cumEl) cumEl.className = 'value ' + (cumRet >= 0 ? 'positive' : 'negative');
@@ -190,9 +198,10 @@
     var tbody = el('prob-tbody');
     if (!tbody || !data) return;
 
-    // API returns: { gaussian: {"85": 0.99, ...}, student_t: {"85": 0.99, ...}, ... }
+    // API returns: { gaussian: {"85": 0.99, ...}, student_t: {"85": 0.99, ...}, multi_horizon: {"21": {...}}, ... }
     var gauss = data.gaussian || {};
     var studt = data.student_t || {};
+    var h21 = (data.multi_horizon && data.multi_horizon['21']) || {};
     var strikes = Object.keys(gauss).sort(function (a, b) { return Number(a) - Number(b); });
 
     if (strikes.length === 0) return;
@@ -201,11 +210,12 @@
     strikes.forEach(function (s) {
       var gPct = (gauss[s] || 0) * 100;
       var tPct = (studt[s] || 0) * 100;
+      var hPct = (h21[s] || 0) * 100;
       html += '<tr>'
         + '<td class="num">$' + s + '</td>'
         + '<td class="num">' + fmt(gPct, 1) + '%</td>'
         + '<td class="num">' + fmt(tPct, 1) + '%</td>'
-        + '<td class="num text-orange">--</td>'
+        + '<td class="num" style="color:var(--gold);">' + fmt(hPct, 1) + '%</td>'
         + '</tr>';
     });
     tbody.innerHTML = html;

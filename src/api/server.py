@@ -84,8 +84,7 @@ def _detect_static_segments(series: pd.Series, min_run: int = 5,
 def _brownian_bridge(n: int, start_val: float, end_val: float,
                      sigma: float) -> np.ndarray:
     """Generate a Brownian bridge path of length n+1."""
-    rng = np.random.default_rng(42)
-    inc = rng.normal(0, sigma, size=n)
+    inc = np.random.normal(0, sigma, size=n)
     w = np.insert(np.cumsum(inc), 0, 0.0)
     t = np.arange(n + 1) / n
     return np.maximum(
@@ -96,6 +95,7 @@ def _brownian_bridge(n: int, start_val: float, end_val: float,
 
 def _apply_brownian_bridge(series: pd.Series) -> pd.Series:
     """Replace static periods in S3 with Brownian-bridge noise."""
+    np.random.seed(42)  # global seed once, matching research script
     rets = series.pct_change().dropna()
     active_sigma = rets[rets.abs() > 1e-8].std()
     segments = _detect_static_segments(series, min_run=5)
@@ -174,7 +174,12 @@ def _load_and_align() -> pd.DataFrame:
 
 def _rolling_ols(data: pd.DataFrame, window: int = ROLLING_WINDOW):
     """
-    63-day rolling OLS: brent_ret ~ alpha + beta * s3_bridged_ret.
+    63-day rolling LAG-1 OLS: brent_ret(t) ~ alpha + beta * s3_bridged_ret(t-1).
+
+    S3 leads Brent by one day.  The estimation window uses lag-1 pairs
+    and the out-of-sample prediction is for the NEXT day's Brent return
+    given today's S3 return.
+
     Returns arrays aligned to data.index.
     """
     brent_ret = data["brent_ret"].values
@@ -187,9 +192,11 @@ def _rolling_ols(data: pd.DataFrame, window: int = ROLLING_WINDOW):
     preds = np.full(n, np.nan)
     residuals = np.full(n, np.nan)
 
-    for t in range(window, n):
-        Y = brent_ret[t - window: t]
-        X_raw = s3_ret[t - window: t]
+    for t in range(window + 1, n):
+        # Lag-1 pairs: Y[i] = brent_ret[i], X[i] = s3_ret[i-1]
+        # Use window pairs ending at t-1 (so we predict t out-of-sample)
+        Y = brent_ret[t - window: t]        # brent returns [t-W .. t-1]
+        X_raw = s3_ret[t - window - 1: t - 1]  # s3 returns [t-W-1 .. t-2] (lagged by 1)
         X = np.column_stack([np.ones(window), X_raw])
         try:
             beta, _, _, _ = np.linalg.lstsq(X, Y, rcond=None)
@@ -204,7 +211,8 @@ def _rolling_ols(data: pd.DataFrame, window: int = ROLLING_WINDOW):
         ss_tot = np.sum((Y - Y.mean()) ** 2)
         r2s[t] = 1.0 - ss_res / ss_tot if ss_tot > 0 else 0.0
 
-        pred = beta[0] + beta[1] * s3_ret[t]
+        # Predict tomorrow's brent using today's s3 (lag-1 out-of-sample)
+        pred = beta[0] + beta[1] * s3_ret[t - 1]
         preds[t] = pred
         residuals[t] = brent_ret[t] - pred
 
@@ -271,6 +279,24 @@ def _compute_strategy(data: pd.DataFrame, preds: np.ndarray):
     # Number of trades (signal flips)
     n_trades = int(np.sum(np.abs(np.diff(signals_valid)) > 0))
 
+    # Win/loss stats (only on active trading days where signal != 0)
+    active_mask = signals_valid != 0
+    active_rets = strat_valid[active_mask]
+    if len(active_rets) > 0:
+        wins = active_rets[active_rets > 0]
+        losses = active_rets[active_rets < 0]
+        win_rate = len(wins) / len(active_rets) if len(active_rets) > 0 else 0.0
+        avg_win = float(np.mean(wins)) if len(wins) > 0 else 0.0
+        avg_loss = float(np.mean(losses)) if len(losses) > 0 else 0.0
+        gross_profit = float(np.sum(wins)) if len(wins) > 0 else 0.0
+        gross_loss = abs(float(np.sum(losses))) if len(losses) > 0 else 1e-9
+        profit_factor = gross_profit / gross_loss if gross_loss > 1e-12 else 0.0
+    else:
+        win_rate = 0.0
+        avg_win = 0.0
+        avg_loss = 0.0
+        profit_factor = 0.0
+
     # Recent trades (last 20)
     recent_n = min(20, total_days)
     recent_trades = []
@@ -300,6 +326,10 @@ def _compute_strategy(data: pd.DataFrame, preds: np.ndarray):
         "directional_accuracy": round(dir_accuracy, 4),
         "n_trades": n_trades,
         "total_days": total_days,
+        "win_rate": round(win_rate, 4),
+        "avg_win": round(avg_win, 6),
+        "avg_loss": round(avg_loss, 6),
+        "profit_factor": round(profit_factor, 4),
         "recent_trades": recent_trades,
         "equity_curve": equity_curve,
     }
